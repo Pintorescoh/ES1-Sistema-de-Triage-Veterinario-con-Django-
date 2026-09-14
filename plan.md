@@ -1,38 +1,30 @@
-# Plan de Proyecto: Sistema de Triage y Priorización de Recepción Veterinaria
+# Planificación del Proyecto - Sistema de Triage (EVA 2)
 
-## 1. El Problema (Apartado de Negocio)
-En las clínicas y hospitales veterinarios con alta demanda, los pacientes llegan simultáneamente a la sala de recepción. Actualmente, el personal administrativo (que no suele tener formación médica avanzada) atiende a los dueños por orden de llegada. Esto genera un cuello de botella peligroso donde mascotas en estado crítico pierden minutos vitales esperando su turno, mientras que pacientes estables acaparan la atención inicial. 
+## 1. Alcance del Proyecto
+El sistema es una aplicación web backend desarrollada en el framework Django para la gestión y evaluación de pacientes en una sala de espera (Triage). Para esta fase del desarrollo, el alcance real del proyecto incluye:
+* Almacenamiento de datos utilizando el motor de base de datos relacional SQLite.
+* Implementación de las cuatro operaciones CRUD (Crear, Leer, Editar, Eliminar) mediante vistas web.
+* Sistema de autenticación de usuarios y restricción de accesos mediante roles (admin, normal, viewer).
+* Implementación de borrado lógico (soft delete) para preservar el historial de pacientes sin perder registros.
 
-El objetivo de este proyecto es construir el motor lógico de un Módulo de Triage rápido. El programa actuará como un filtro automático en la recepción que evaluará dos signos vitales básicos e indicará inmediatamente al recepcionista en qué sala debe esperar el paciente (Box de Reanimación, Observación o Espera General), garantizando que los casos de riesgo vital pasen primero.
+## 2. Priorización de Requerimientos (MoSCoW)
 
-## 2. Los Datos y la Regla de Decisión (Apartado Técnico)
-El programa procesará el ingreso de un paciente a la vez a través de la consola, capturando los datos mediante la función `input()` y convirtiéndolos a números enteros con `int()`. 
-
-Se evaluarán dos variables clave:
-1. `dificultad_respiratoria`: (1 = Sí tiene ahogo, 0 = No tiene ahogo).
-2. `nivel_dolor`: Escala del 1 al 10.
-
-Utilizando estructuras condicionales (`if` y `elif`), el algoritmo generará uno de los siguientes cuatro dictámenes:
-* **Dato Inválido:** Si los datos ingresados no corresponden a las escalas permitidas (ej. dolor menor a 1 o mayor a 10).
-* **Aceptado (Código Rojo):** Si hay dificultad respiratoria (1), el paciente ingresa de inmediato a Reanimación, independientemente de su nivel de dolor.
-* **Rechazado para Urgencia Vital 1 (Código Amarillo):** Si no hay dificultad respiratoria (0), pero el dolor es alto (6 a 10). Se deriva a Observación para manejo del dolor.
-* **Rechazado para Urgencia Vital 2 (Código Verde):** Si no hay dificultad respiratoria (0) y el dolor es bajo (1 a 5). Se deriva a la Sala de Espera General.
-
-## 3. Priorización de Requerimientos (Modelo MoSCoW)
-
-### Must Have (Debe tener obligatoriamente)
-* Un script en Python (`solucion.py`) que solicite por consola la dificultad respiratoria y el nivel de dolor utilizando `int()`.
-* Una estructura condicional `if/elif` que procese las dos variables y retorne las cuatro salidas estipuladas.
-* Almacenamiento de cada registro de triage como un diccionario dentro de un archivo local llamado `datos.json` utilizando la librería `json`.
+### Must Have (Debe tener)
+* Conexión funcional y migrada a base de datos SQLite.
+* Operaciones CRUD completamente operativas.
+* Integración intacta de la regla de decisión de triage importada desde la lógica original.
+* Sistema de Login y Logout para manejo de sesiones.
+* Seguridad en servidor mediante decoradores para restringir vistas según el grupo del usuario.
+* Borrado lógico de fichas médicas.
 
 ### Should Have (Debería tener)
-* Manejo básico de errores para notificar al usuario si ingresa un rango de dolor inválido.
-* Uso de la librería `tabulate` para mostrar un resumen claro por consola de los pacientes que ya han sido ingresados en la jornada.
+* Administrador de Django fuertemente personalizado (columnas, filtros y barra de búsqueda).
+* Formularios protegidos con tokens CSRF para evitar vulnerabilidades de seguridad.
 
 ### Could Have (Podría tener)
-* Una vista de lectura web construida con Django (`views.py`) que consuma el archivo `datos.json` y envíe la información a un template (`resumen.html`) para visualizar un panel de control con el estado de la sala de espera.
+* Interfaz gráfica (HTML/CSS) estilizada para la vista de la lista de pacientes y formularios de ingreso.
 
-### Won't Have (No tendrá por ahora)
-* Conexión a bases de datos relacionales o no relacionales.
-* Diagnósticos médicos detallados de la mascota o prescripción de medicamentos.
-* Cuenta de usuarios.
+### Won't Have (No tendrá en esta versión)
+* Almacenamiento local basado en archivos de texto o `datos.json`.
+* Motores de base de datos externos o alojados en la nube (ej. MongoDB o PostgreSQL).
+* Creación de cuentas de usuario de forma pública (los perfiles son generados internamente por el administrador).

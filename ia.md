@@ -1,8 +1,7 @@
-# Uso de Inteligencia Artificial
+# Uso de Inteligencia Artificial (EVA 2)
 
 Durante este proyecto, utilicé IA (Gemini) como un asistente de aprendizaje para entender la sintaxis de Python y la estructura base de Django.
 
-**Correcciones y decisiones propias:**
-* **Manejo de Errores (Bugs):** Cuando el programa falló al comparar textos con números, identifiqué y apliqué el uso de la función `int()` en los inputs para solucionarlo.
-* **Lógica Matemática:** Corregí un vacío lógico en los condicionales (`elif`), cambiando un `<=` a un `< 6` para asegurar que ningún número del 1 al 10 quedara fuera del sistema de evaluación.
-* **Diseño de Interfaz:** Decidí modificar los diccionarios para que en la terminal y en la web se mostrara "Sí" o "No" en lugar de un `1` o un `0` en la dificultad respiratoria, mejorando la lectura del usuario. Además, estandaricé las llaves del JSON para que coincidieran perfectamente con las variables del HTML.
+* La IA me propuso utilizar MongoDB Atlas en la nube, pero rechacé y corregí esta sugerencia basándome en el documento de migración, obligando a la IA a reestructurar el modelo para utilizar SQLite localmente".
+
+* La IA me entregó el código inicial para el archivo `views.py` intentando importar una función inventada por ella llamada `evaluar_triage`. Al levantar el servidor, el sistema arrojó error. Le mostré la evidencia a la IA y le exigí que corrigiera el código, así respetar el documento de instrucciones que indicaba explícitamente que la función original debía mantenerse intacta bajo el nombre `decidir()`. La IA tuvo que reescribir las vistas para importar correctamente el motor lógico.
