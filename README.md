@@ -1,8 +1,8 @@
-**Proyecto EVA 2: Sistema de Triage Clínico 🏥**
+##Proyecto EVA 2: Sistema de Triage Clínico 🏥##
 
 Sistema web desarrollado en Django para la recepción y evaluación inicial de pacientes en un entorno clínico. El sistema utiliza una base de datos SQLite y se enfoca en la automatización del cálculo de gravedad y la seguridad de los datos.
 
-**🚀 Novedades y Características de la EVA 2**
+##🚀 Novedades y Características de la EVA 2##
 
 En esta iteración se implementaron mejoras significativas en la arquitectura, seguridad y usabilidad del sistema:
 
@@ -16,37 +16,49 @@ Feedback de Interfaz: Integración del framework de mensajes de Django para prov
 
 Optimización de Dependencias: Limpieza del entorno virtual y configuración de un archivo requirements.txt estandarizado en formato UTF-8 para máxima compatibilidad multiplataforma.
 
-**⚙️ Instrucciones de Despliegue (Prueba de Clon Limpio)**
+##⚙️ Instrucciones de Despliegue (Prueba de Clon Limpio)##
 
 Para ejecutar este proyecto desde cero en un entorno local, sigue estos pasos:
 
 **1. Clonar el repositorio y crear el entorno virtual:**
+```
 git clone -b eva2 <URL_DE_TU_REPOSITORIO>
 cd <NOMBRE_DE_TU_CARPETA>
-python -m venv venv
-
+python -m venv venv 
+```
 
 **2. Activar el entorno virtual:**
+```
 Windows: .\venv\Scripts\activate
 Mac/Linux: source venv/bin/activate
+```
 
 **3. Instalar las dependencias:**
+```
 pip install -r requirements.txt
+```
 
 **4. Configurar variables de entorno:**
+```
 Copia el archivo de ejemplo y renómbralo para crear tu entorno local:
 Copia .env.example y renómbralo a .env
 Abre el archivo .env y asigna valores válidos (ej. SECRET_KEY=clave_segura y DEBUG=True).
+```
 
 **5. Generar la base de datos (SQLite):**
+```
 python manage.py migrate
+```
 
 **6. Configurar Roles y Usuarios base:**
 Ejecuta el script de poblamiento para crear automáticamente los grupos de seguridad y un usuario de prueba para cada uno (la contraseña por defecto para todos es Inacap2026!):
+```
 python setup_roles.py
-
+```
 
 **7. Levantar el servidor:**
+```
 python manage.py runserver
 
 El sistema estará disponible en http://127.0.0.1:8000/.
+```
