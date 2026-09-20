@@ -1,8 +1,8 @@
-##Proyecto EVA 2: Sistema de Triage Clínico 🏥
+#Proyecto EVA 2: Sistema de Triage Clínico 🏥
 
 Sistema web desarrollado en Django para la recepción y evaluación inicial de pacientes en un entorno clínico. El sistema utiliza una base de datos SQLite y se enfoca en la automatización del cálculo de gravedad y la seguridad de los datos.
 
-##🚀 Novedades y Características de la EVA 2
+#🚀 Novedades y Características de la EVA 2
 
 En esta iteración se implementaron mejoras significativas en la arquitectura, seguridad y usabilidad del sistema:
 
@@ -16,7 +16,7 @@ Feedback de Interfaz: Integración del framework de mensajes de Django para prov
 
 Optimización de Dependencias: Limpieza del entorno virtual y configuración de un archivo requirements.txt estandarizado en formato UTF-8 para máxima compatibilidad multiplataforma.
 
-##⚙️ Instrucciones de Despliegue (Prueba de Clon Limpio)
+#⚙️ Instrucciones de Despliegue (Prueba de Clon Limpio)
 
 Para ejecutar este proyecto desde cero en un entorno local, sigue estos pasos:
 
