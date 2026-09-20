@@ -6,6 +6,15 @@
 </head>
 <body>
     <h1>Estado Actual de la Sala</h1>
+    <!-- Sistema de mensajes de Django -->
+    {% if messages %}
+        <ul style="color: red; font-weight: bold; border: 1px solid red; padding: 10px;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
     <a href="{% url 'crear' %}">✚ Ingresar Nuevo Paciente</a>
     
     <table border="1" style="margin-top: 15px;">

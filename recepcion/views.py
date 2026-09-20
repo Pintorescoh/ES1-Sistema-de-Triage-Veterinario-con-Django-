@@ -62,8 +62,11 @@ def crear(request):
         except ValueError:
             error = "El dolor debe ser un número entero."
         else:
-            # ¡Corregido! Usamos decidir()
-            resultado = decidir(respiracion, dolor)
+            # 1. Convertimos "Si"/"No" a 1 o 0
+            resp_num = 1 if respiracion.lower() in ["si", "sí"] else 0
+            # 2. Le pasamos el número a tu función
+            resultado = decidir(resp_num, dolor)
+            
             Paciente.objects.create(
                 nombre=nombre, 
                 dificultad_respiracion=respiracion,
@@ -89,8 +92,11 @@ def editar(request, pk):
         except ValueError:
             error = "El dolor debe ser un número entero."
         else:
-            # ¡Corregido! Usamos decidir()
-            paciente.gravedad = decidir(paciente.dificultad_respiracion, paciente.dolor)
+            # 1. Convertimos "Si"/"No" a 1 o 0
+            resp_num = 1 if paciente.dificultad_respiracion.lower() in ["si", "sí"] else 0
+            # 2. Le pasamos el número a tu función
+            paciente.gravedad = decidir(resp_num, paciente.dolor)
+            
             paciente.save()
             return redirect("lista")
             
