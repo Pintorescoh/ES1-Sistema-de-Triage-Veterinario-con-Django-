@@ -1,22 +1,20 @@
-#Proyecto EVA 2: Sistema de Triage Clínico 🏥#
+# Proyecto EVA 2: Sistema de Triage Clínico 🏥
 
 Sistema web desarrollado en Django para la recepción y evaluación inicial de pacientes en un entorno clínico. El sistema utiliza una base de datos SQLite y se enfoca en la automatización del cálculo de gravedad y la seguridad de los datos.
 
-#🚀 Novedades y Características de la EVA 2#
+## 🚀 Novedades y Características de la EVA 2
 
 En esta iteración se implementaron mejoras significativas en la arquitectura, seguridad y usabilidad del sistema:
 
-Automatización de Reglas de Negocio (Triage): Se trasladó la lógica de evaluación (función decidir()) directamente al método save() del modelo Paciente. Esto garantiza que el sistema asigne automáticamente el código de gravedad (Rojo, Amarillo o Verde) basado en el dolor y la respiración, asegurando la integridad de los datos tanto en la interfaz de usuario como en el panel de administración.
+* **Automatización de Reglas de Negocio (Triage):** Se trasladó la lógica de evaluación (función `decidir()`) directamente al método `save()` del modelo `Paciente`. Esto garantiza que el sistema asigne automáticamente el código de gravedad (Rojo, Amarillo o Verde) basado en el dolor y la respiración, asegurando la integridad de los datos tanto en la interfaz de usuario como en el panel de administración.
+* **Control de Acceso Basado en Roles (RBAC):** Se implementó seguridad a nivel de vistas. Las operaciones CRUD están restringidas según tres niveles de grupos: `admin`, `normal` y `viewer`.
+* **Gestión de Entornos y Seguridad:** Aislamiento de variables sensibles (`SECRET_KEY`, `DEBUG`) utilizando `python-dotenv`. El repositorio está saneado (sin rastros de `.env` en el caché de Git) siguiendo las mejores prácticas de versionamiento.
+* **Feedback de Interfaz:** Integración del framework de mensajes de Django para proveer retroalimentación visual al usuario cuando intenta realizar acciones sin los permisos correspondientes.
+* **Optimización de Dependencias:** Limpieza del entorno virtual y configuración de un archivo `requirements.txt` estandarizado en formato UTF-8 para máxima compatibilidad multiplataforma.
 
-Control de Acceso Basado en Roles (RBAC): Se implementó seguridad a nivel de vistas. Las operaciones CRUD están restringidas según tres niveles de grupos: admin, normal y viewer.
+---
 
-Gestión de Entornos y Seguridad: Aislamiento de variables sensibles (SECRET_KEY, DEBUG) utilizando python-dotenv. El repositorio está saneado (sin rastros de .env en el caché de Git) siguiendo las mejores prácticas de versionamiento.
-
-Feedback de Interfaz: Integración del framework de mensajes de Django para proveer retroalimentación visual al usuario cuando intenta realizar acciones sin los permisos correspondientes.
-
-Optimización de Dependencias: Limpieza del entorno virtual y configuración de un archivo requirements.txt estandarizado en formato UTF-8 para máxima compatibilidad multiplataforma.
-
-#⚙️ Instrucciones de Despliegue (Prueba de Clon Limpio)#
+## ⚙️ Instrucciones de Despliegue (Prueba de Clon Limpio)
 
 Para ejecutar este proyecto desde cero en un entorno local, sigue estos pasos:
 
