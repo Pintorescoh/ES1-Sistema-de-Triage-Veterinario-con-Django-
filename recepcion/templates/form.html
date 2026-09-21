@@ -3,32 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ accion }} Paciente</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #edf4f8;
+            margin: 0;
+            padding: 30px;
+            color: #233b50;
+        }
+        .card {
+            max-width: 560px;
+            margin: 40px auto;
+            background: #f9fbfd;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 20px rgba(53, 80, 109, 0.08);
+            border: 1px solid #dfeaf3;
+        }
+        h1 {
+            color: #234b69;
+            margin-top: 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 18px;
+            border: 1px solid #c9d9e7;
+            border-radius: 8px;
+            box-sizing: border-box;
+            background: #ffffff;
+        }
+        .error {
+            color: #8c2f35;
+            background: #fbe9eb;
+            border: 1px solid #ecc7ca;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+        .actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        button {
+            background: #6a8db2;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        a {
+            color: #1a4f82;
+            text-decoration: none;
+        }
+
+        input[type="number"].dolor-input:invalid {
+            border-color: #d78a2a;
+        }
+    </style>
 </head>
 <body>
-    <h1>{{ accion }} Paciente</h1>
-    
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
+    <div class="card">
+        <h1>{{ accion }} Paciente</h1>
 
-    <form method="POST">
-        <!-- CRÍTICO: Token de seguridad obligatorio -->
-        {% csrf_token %}
-        
-        <label>Nombre paciente:</label><br>
-        <input type="text" name="nombre" value="{{ registro.nombre }}" required><br><br>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
 
-        <label>¿Tiene ahogo o dificultad para respirar?:</label><br>
-        <select name="dificultad_respiracion" required>
-            <option value="Sí" {% if registro.dificultad_respiracion == 'Sí' %}selected{% endif %}>Sí</option>
-            <option value="No" {% if registro.dificultad_respiracion == 'No' %}selected{% endif %}>No</option>
-        </select><br><br>
+        <form method="POST">
+            {% csrf_token %}
 
-        <label>Nivel de dolor (1 al 10):</label><br>
-        <input type="number" name="dolor" value="{{ registro.dolor }}" required><br><br>
+            <label>Nombre paciente:</label>
+            <input type="text" name="nombre" value="{{ registro.nombre }}" required>
 
-        <button type="submit">Guardar</button>
-        <a href="{% url 'lista' %}">Cancelar</a>
-    </form>
+            <label>¿Tiene ahogo o dificultad para respirar?:</label>
+            <select name="dificultad_respiracion" required>
+                <option value="Sí" {% if registro.dificultad_respiracion == 'Sí' %}selected{% endif %}>Sí</option>
+                <option value="No" {% if registro.dificultad_respiracion == 'No' %}selected{% endif %}>No</option>
+            </select>
+
+            <p><strong>Gravedad:</strong> opcional. Se llena automáticamente según la dificultad respiratoria y el dolor.</p>
+
+            <label>Nivel de dolor (0 al 10):</label>
+                 <input type="number" name="dolor" id="dolor" class="dolor-input" min="0" max="10" value="{{ registro.dolor }}" required
+                     oninvalid="this.setCustomValidity('El nivel de dolor debe estar entre 0 y 10.');"
+                     oninput="this.setCustomValidity('');">
+
+            <div class="actions">
+                <button type="submit">Guardar</button>
+                <a href="{% url 'lista' %}">Cancelar</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const dolorInput = document.getElementById('dolor');
+        if (dolorInput) {
+            dolorInput.addEventListener('invalid', function () {
+                if (this.value < this.min || this.value > this.max) {
+                    this.setCustomValidity('El nivel de dolor debe estar entre 0 y 10.');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        }
+    </script>
 </body>
 </html>

@@ -14,3 +14,24 @@ class PacienteAdmin(admin.ModelAdmin):
     
     # Protegemos el campo de fecha de eliminación para que no se edite a mano
     readonly_fields = ("fecha_eliminacion",)
+
+    def _puede_administrar(self, user):
+        return user.is_superuser or user.groups.filter(name="admin").exists()
+
+    def has_module_permission(self, request):
+        return self._puede_administrar(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return self._puede_administrar(request.user)
+
+    def has_add_permission(self, request):
+        return self._puede_administrar(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return self._puede_administrar(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return self._puede_administrar(request.user)
+
+    def delete_model(self, request, obj):
+        obj.soft_delete()

@@ -1,9 +1,16 @@
 import os
+from getpass import getpass
 import django
 
 # Conectamos este script con la configuración de tu proyecto Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'clinica.settings')
 django.setup()
+
+password = os.getenv("USERS_PASSWORD")
+if not password:
+    password = getpass("Contraseña para los usuarios creados: ")
+    if not password:
+        raise SystemExit("La contraseña no puede estar vacía")
 
 from django.contrib.auth.models import Group, User
 
@@ -19,9 +26,12 @@ for rol in roles:
     # 2. Creamos un usuario de prueba para ese grupo
     user, u_created = User.objects.get_or_create(username=f"usuario_{rol}")
     
-    if u_created:
-        user.set_password("Inacap2026!") # Le ponemos una contraseña por defecto
-        user.save()
+    user.set_password(password)
+    user.save(update_fields=["password"])
+
+    if rol == "admin" and not user.is_staff:
+        user.is_staff = True
+        user.save(update_fields=["is_staff"])
     
     # 3. Metemos al usuario dentro de su grupo correspondiente
     user.groups.add(grupo)

@@ -1,10 +1,19 @@
+def normalizar_gravedad(valor):
+    if valor is None:
+        return ""
+    texto = str(valor).strip()
+    if texto.lower().startswith("código "):
+        return texto.replace("Código ", "", 1).strip()
+    return texto
+
+
 def decidir(dificultad_respiratoria, nivel_dolor):
-    # 2. Motor de Decisiones (Triage) extraído de tu código original
-    if dificultad_respiratoria not in [0, 1] or nivel_dolor < 1 or nivel_dolor > 10:
+    # Motor de decisiones del triage.
+    if dificultad_respiratoria not in [0, 1] or nivel_dolor < 0 or nivel_dolor > 10:
         return "Inválido"
     elif dificultad_respiratoria == 1:
-        return "Código Rojo"
+        return "Rojo"
     elif nivel_dolor >= 6:
-        return "Código Amarillo"
+        return "Amarillo"
     else:
-        return "Código Verde"
+        return "Verde"

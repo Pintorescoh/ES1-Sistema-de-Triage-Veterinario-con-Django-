@@ -18,7 +18,7 @@ El sistema es una aplicación web backend desarrollada en el framework Django pa
 * Borrado lógico de fichas médicas.
 
 ### Should Have (Debería tener)
-* Administrador de Django fuertemente personalizado (columnas, filtros y barra de búsqueda).
+* Administrador de Django fuertemente personalizado (columnas, filtros, barra de búsqueda y permisos para el grupo `admin`).
 * Formularios protegidos con tokens CSRF para evitar vulnerabilidades de seguridad.
 
 ### Could Have (Podría tener)

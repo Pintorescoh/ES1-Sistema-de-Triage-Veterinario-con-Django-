@@ -1,62 +1,61 @@
 # Proyecto EVA 2: Sistema de Triage Clínico 🏥
 
-Sistema web desarrollado en Django para la recepción y evaluación inicial de pacientes en un entorno clínico. El sistema utiliza una base de datos SQLite y se enfoca en la automatización del cálculo de gravedad y la seguridad de los datos.
+Sistema web desarrollado en Django para la recepción y evaluación inicial de pacientes en un entorno clínico. Utiliza SQLite y automatiza el cálculo de gravedad mediante la regla de triage original.
 
-## 🚀 Novedades y Características de la EVA 2
+## 🚀 Características
 
-En esta iteración se implementaron mejoras significativas en la arquitectura, seguridad y usabilidad del sistema:
+* **Regla de triage:** `decidir()` se mantiene en `solucion.py` y el modelo calcula automáticamente la gravedad al guardar un paciente.
+* **Roles y seguridad:** las operaciones CRUD están restringidas mediante los grupos `admin`, `normal` y `viewer`. El administrador Django también está protegido por rol.
+* **Configuración segura:** las variables `SECRET_KEY`, `DEBUG` y `USERS_PASSWORD` se gestionan mediante `python-dotenv`.
+* **Borrado lógico:** los pacientes eliminados se conservan como historial.
+* **Interfaz:** formularios y lista de pacientes con validaciones, mensajes y protección CSRF.
 
-* **Automatización de Reglas de Negocio (Triage):** Se trasladó la lógica de evaluación (función `decidir()`) directamente al método `save()` del modelo `Paciente`. Esto garantiza que el sistema asigne automáticamente el código de gravedad (Rojo, Amarillo o Verde) basado en el dolor y la respiración, asegurando la integridad de los datos tanto en la interfaz de usuario como en el panel de administración.
-* **Control de Acceso Basado en Roles (RBAC):** Se implementó seguridad a nivel de vistas. Las operaciones CRUD están restringidas según tres niveles de grupos: `admin`, `normal` y `viewer`.
-* **Gestión de Entornos y Seguridad:** Aislamiento de variables sensibles (`SECRET_KEY`, `DEBUG`) utilizando `python-dotenv`. El repositorio está saneado (sin rastros de `.env` en el caché de Git) siguiendo las mejores prácticas de versionamiento.
-* **Feedback de Interfaz:** Integración del framework de mensajes de Django para proveer retroalimentación visual al usuario cuando intenta realizar acciones sin los permisos correspondientes.
-* **Optimización de Dependencias:** Limpieza del entorno virtual y configuración de un archivo `requirements.txt` estandarizado en formato UTF-8 para máxima compatibilidad multiplataforma.
+## ⚙️ Instrucciones de despliegue
 
----
+Para ejecutar el proyecto desde cero:
 
-## ⚙️ Instrucciones de Despliegue (Prueba de Clon Limpio)
+1. Clonar el repositorio y crear el entorno virtual:
 
-Para ejecutar este proyecto desde cero en un entorno local, sigue estos pasos:
-
-**1. Clonar el repositorio y crear el entorno virtual:**
-```
-git clone -b eva2 <URL_DE_TU_REPOSITORIO>
-cd <NOMBRE_DE_TU_CARPETA>
-python -m venv venv 
+```powershell
+git clone <URL_DEL_REPOSITORIO>
+cd miproyecto
+python -m venv venv
 ```
 
-**2. Activar el entorno virtual:**
-```
-Windows: .\venv\Scripts\activate
-Mac/Linux: source venv/bin/activate
+2. Activar el entorno virtual:
+
+```powershell
+.\venv\Scripts\activate
 ```
 
-**3. Instalar las dependencias:**
-```
+3. Instalar las dependencias:
+
+```powershell
 pip install -r requirements.txt
 ```
 
-**4. Configurar variables de entorno:**
-```
-Copia el archivo de ejemplo y renómbralo para crear tu entorno local:
-Copia .env.example y renómbralo a .env
-Abre el archivo .env y asigna valores válidos (ej. SECRET_KEY=clave_segura y DEBUG=True).
-```
+4. Crear el archivo `.env` a partir de `.env.example` y asignar valores para `SECRET_KEY`, `DEBUG` y `USERS_PASSWORD`.
 
-**5. Generar la base de datos (SQLite):**
-```
+5. Crear las tablas de SQLite:
+
+```powershell
 python manage.py migrate
 ```
 
-**6. Configurar Roles y Usuarios base:**
-Ejecuta el script de poblamiento para crear automáticamente los grupos de seguridad y un usuario de prueba para cada uno (la contraseña por defecto para todos es Inacap2026!):
-```
+6. Crear los grupos y usuarios base:
+
+```powershell
 python setup_roles.py
 ```
 
-**7. Levantar el servidor:**
-```
-python manage.py runserver
+Si `USERS_PASSWORD` no está en `.env`, el script la solicitará de forma oculta en la terminal.
 
-El sistema estará disponible en http://127.0.0.1:8000/.
+7. Levantar el servidor:
+
+```powershell
+python manage.py runserver
 ```
+
+La aplicación estará disponible en http://127.0.0.1:8000/login/.
+
+El panel de administración estará disponible en http://127.0.0.1:8000/admin/ para el usuario del grupo `admin`.

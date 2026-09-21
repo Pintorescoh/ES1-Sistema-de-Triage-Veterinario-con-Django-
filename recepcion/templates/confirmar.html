@@ -3,17 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <title>Confirmar Eliminación</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #edf4f8;
+            margin: 0;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .card {
+            background: #f9fbfd;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(53, 80, 109, 0.08);
+            padding: 30px;
+            width: 420px;
+            border: 1px solid #dfeaf3;
+        }
+        h1 {
+            color: #234b69;
+        }
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            align-items: center;
+        }
+        button {
+            background: #c62828;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        a {
+            color: #1a4f82;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
-    <h1>¿Estás seguro?</h1>
-    <p>¿Deseas eliminar del sistema al paciente <strong>{{ registro.nombre }}</strong>?</p>
-    
-    <form method="POST">
-        <!-- CRÍTICO: Token de seguridad obligatorio -->
-        {% csrf_token %}
-        
-        <button type="submit">Sí, eliminar</button>
-        <a href="{% url 'lista' %}">Cancelar</a>
-    </form>
+    <div class="card">
+        <h1>¿Estás seguro?</h1>
+        <p>¿Deseas eliminar del sistema al paciente <strong>{{ registro.nombre }}</strong>?</p>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="actions">
+                <button type="submit">Sí, eliminar</button>
+                <a href="{% url 'lista' %}">Cancelar</a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

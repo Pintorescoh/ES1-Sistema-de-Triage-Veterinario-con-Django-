@@ -3,44 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <title>Sala de Espera - Triage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #edf4f8;
+            margin: 0;
+            padding: 30px;
+            color: #233b50;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #f9fbfd;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(53, 80, 109, 0.08);
+            border: 1px solid #dfeaf3;
+        }
+        h1 {
+            margin-top: 0;
+            color: #234b69;
+        }
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .button {
+            display: inline-block;
+            background: #6a8db2;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .button.secondary {
+            background: #7b8796;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #dfeaf3;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #e7f0f7;
+            color: #294766;
+        }
+        .messages {
+            color: #b00020;
+            background: #fdecea;
+            border: 1px solid #f7c9c8;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            list-style: none;
+        }
+        .empty {
+            text-align: center;
+            font-style: italic;
+            color: #5d7288;
+        }
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-weight: bold;
+            color: white;
+        }
+        .rojo { background: #d32f2f; }
+        .amarillo { background: #f9a825; color: #222; }
+        .verde { background: #2e7d32; }
+        .invalido { background: #616161; }
+    </style>
 </head>
 <body>
-    <h1>Estado Actual de la Sala</h1>
-    <!-- Sistema de mensajes de Django -->
-    {% if messages %}
-        <ul style="color: red; font-weight: bold; border: 1px solid red; padding: 10px;">
-            {% for message in messages %}
-                <li>{{ message }}</li>
+    <div class="container">
+        <h1>Estado Actual de la Sala</h1>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="toolbar">
+            {% if not is_viewer %}
+                <a class="button" href="{% url 'crear' %}">✚ Ingresar Nuevo Paciente</a>
+            {% endif %}
+            <a class="button secondary" href="{% url 'logout' %}">Cerrar sesión</a>
+        </div>
+
+        <table>
+            <tr>
+                <th>Nombre</th>
+                <th>Gravedad</th>
+                <th>Respiración</th>
+                <th>Dolor</th>
+                {% if not is_viewer %}
+                    <th>Acciones</th>
+                {% endif %}
+            </tr>
+            {% for paciente in pacientes %}
+            <tr>
+                <td>{{ paciente.nombre }}</td>
+                <td>
+                    {% with gravedad_norm=patient.gravedad|default:'' %}
+                        {% if paciente.gravedad == 'Rojo' or paciente.gravedad == 'Código Rojo' %}
+                            <span class="badge rojo">Rojo</span>
+                        {% elif paciente.gravedad == 'Amarillo' or paciente.gravedad == 'Código Amarillo' %}
+                            <span class="badge amarillo">Amarillo</span>
+                        {% elif paciente.gravedad == 'Verde' or paciente.gravedad == 'Código Verde' %}
+                            <span class="badge verde">Verde</span>
+                        {% else %}
+                            <span class="badge invalido">{{ paciente.gravedad }}</span>
+                        {% endif %}
+                    {% endwith %}
+                </td>
+                <td>{{ paciente.dificultad_respiracion }}</td>
+                <td>{{ paciente.dolor }}</td>
+                {% if not is_viewer %}
+                    <td>
+                        <a href="{% url 'editar' paciente.pk %}">Editar</a>
+                        {% if not is_normal %}
+                            |
+                            <a href="{% url 'eliminar' paciente.pk %}">Eliminar</a>
+                        {% endif %}
+                    </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td class="empty" colspan="{% if is_viewer %}4{% else %}5{% endif %}">La sala de espera está vacía.</td>
+            </tr>
             {% endfor %}
-        </ul>
-    {% endif %}
-    
-    <a href="{% url 'crear' %}">✚ Ingresar Nuevo Paciente</a>
-    
-    <table border="1" style="margin-top: 15px;">
-        <tr>
-            <th>Nombre</th>
-            <th>Gravedad</th>
-            <th>Respiración</th>
-            <th>Dolor</th>
-            <th>Acciones</th>
-        </tr>
-        {% for paciente in pacientes %}
-        <tr>
-            <td>{{ paciente.nombre }}</td>
-            <td><strong>{{ paciente.gravedad }}</strong></td>
-            <td>{{ paciente.dificultad_respiracion }}</td>
-            <td>{{ paciente.dolor }}</td>
-            <td>
-                <a href="{% url 'editar' paciente.pk %}">Editar</a> | 
-                <a href="{% url 'eliminar' paciente.pk %}">Eliminar</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5">La sala de espera está vacía.</td>
-        </tr>
-        {% endfor %}
-    </table>
+        </table>
+    </div>
 </body>
 </html>

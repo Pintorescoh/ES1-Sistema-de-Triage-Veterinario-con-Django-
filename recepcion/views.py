@@ -46,8 +46,10 @@ def vista_logout(request):
 # 1. READ (Leer la sala de espera)
 @login_required(login_url="login")
 def lista(request):
-    pacientes = Paciente.objects.filter(eliminado=False) 
-    return render(request, "lista.html", {"pacientes": pacientes})
+    pacientes = Paciente.objects.filter(eliminado=False)
+    is_viewer = request.user.groups.filter(name="viewer").exists() or request.user.is_superuser
+    is_normal = request.user.groups.filter(name="normal").exists() and not request.user.is_superuser
+    return render(request, "lista.html", {"pacientes": pacientes, "is_viewer": is_viewer, "is_normal": is_normal})
 
 # 2. CREATE (Crear paciente)
 @requiere_rol("admin", "normal")
@@ -56,50 +58,48 @@ def crear(request):
     if request.method == "POST":
         nombre = request.POST.get("nombre", "").strip()
         respiracion = request.POST.get("dificultad_respiracion", "").strip()
-        
+
         try:
             dolor = int(request.POST.get("dolor", ""))
-        except ValueError:
+        except (TypeError, ValueError):
             error = "El dolor debe ser un número entero."
         else:
-            # 1. Convertimos "Si"/"No" a 1 o 0
-            resp_num = 1 if respiracion.lower() in ["si", "sí"] else 0
-            # 2. Le pasamos el número a tu función
-            resultado = decidir(resp_num, dolor)
-            
-            Paciente.objects.create(
-                nombre=nombre, 
-                dificultad_respiracion=respiracion,
-                dolor=dolor, 
-                gravedad=resultado
-            )
-            return redirect("lista")
-            
+            if dolor < 0 or dolor > 10:
+                error = "Error: El nivel de dolor debe estar entre 0 y 10."
+            else:
+                Paciente.objects.create(
+                    nombre=nombre,
+                    dificultad_respiracion=respiracion,
+                    dolor=dolor
+                )
+                return redirect("lista")
+
     return render(request, "form.html", {"accion": "Crear", "error": error})
 
 # 3. UPDATE (Editar paciente)
-@requiere_rol("admin")
+@requiere_rol("admin", "normal")
 def editar(request, pk):
     paciente = get_object_or_404(Paciente, pk=pk, eliminado=False)
     error = None
-    
+
     if request.method == "POST":
-        paciente.nombre = request.POST.get("nombre", "").strip()
-        paciente.dificultad_respiracion = request.POST.get("dificultad_respiracion", "").strip()
-        
+        nombre = request.POST.get("nombre", "").strip()
+        respiracion = request.POST.get("dificultad_respiracion", "").strip()
+
         try:
-            paciente.dolor = int(request.POST.get("dolor", ""))
-        except ValueError:
+            dolor = int(request.POST.get("dolor", ""))
+        except (TypeError, ValueError):
             error = "El dolor debe ser un número entero."
         else:
-            # 1. Convertimos "Si"/"No" a 1 o 0
-            resp_num = 1 if paciente.dificultad_respiracion.lower() in ["si", "sí"] else 0
-            # 2. Le pasamos el número a tu función
-            paciente.gravedad = decidir(resp_num, paciente.dolor)
-            
-            paciente.save()
-            return redirect("lista")
-            
+            if dolor < 0 or dolor > 10:
+                error = "Error: El nivel de dolor debe estar entre 0 y 10."
+            else:
+                paciente.nombre = nombre
+                paciente.dificultad_respiracion = respiracion
+                paciente.dolor = dolor
+                paciente.save()
+                return redirect("lista")
+
     return render(request, "form.html", {"accion": "Editar", "registro": paciente, "error": error})
 
 # 4. DELETE (Eliminar paciente)
