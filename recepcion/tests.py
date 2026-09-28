@@ -1,5 +1,9 @@
+from django.contrib import admin
+from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.urls import reverse
 from solucion import decidir, normalizar_gravedad
+from .models import Paciente
 
 class TriageTests(TestCase):
     def test_decidir_logica_rojo(self):
@@ -26,3 +30,42 @@ class TriageTests(TestCase):
         self.assertEqual(normalizar_gravedad("Código Rojo"), "Rojo")
         self.assertEqual(normalizar_gravedad("Código Amarillo"), "Amarillo")
         self.assertEqual(normalizar_gravedad("Código Verde"), "Verde")
+
+
+class PacienteAdminTests(TestCase):
+    def setUp(self):
+        self.admin_user = get_user_model().objects.create_superuser(
+            username="admin_test",
+            email="admin@example.com",
+            password="test-password-123",
+        )
+        self.paciente = Paciente.objects.create(
+            nombre="Luna",
+            dificultad_respiracion="No",
+            dolor=2,
+        )
+        self.client.force_login(self.admin_user)
+
+    def test_accion_masiva_marca_paciente_como_eliminado(self):
+        response = self.client.post(
+            reverse("admin:recepcion_paciente_changelist"),
+            {
+                "action": "eliminar_logicamente",
+                "_selected_action": [str(self.paciente.pk)],
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.paciente.refresh_from_db()
+        self.assertTrue(self.paciente.eliminado)
+        self.assertIsNotNone(self.paciente.fecha_eliminacion)
+        self.assertTrue(Paciente.objects.filter(pk=self.paciente.pk).exists())
+
+    def test_admin_no_ofrece_eliminacion_fisica_masiva(self):
+        request = self.client.get(
+            reverse("admin:recepcion_paciente_changelist")
+        ).wsgi_request
+        actions = admin.site._registry[Paciente].get_actions(request)
+
+        self.assertIn("eliminar_logicamente", actions)
+        self.assertNotIn("delete_selected", actions)

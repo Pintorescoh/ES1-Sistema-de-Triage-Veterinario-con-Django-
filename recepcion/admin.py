@@ -3,6 +3,8 @@ from .models import Paciente
 
 @admin.register(Paciente)
 class PacienteAdmin(admin.ModelAdmin):
+    actions = ("eliminar_logicamente",)
+
     # Columnas que se verán en la lista principal
     list_display = ("nombre", "gravedad", "dificultad_respiracion", "dolor", "fecha", "eliminado")
     
@@ -35,3 +37,19 @@ class PacienteAdmin(admin.ModelAdmin):
 
     def delete_model(self, request, obj):
         obj.soft_delete()
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        actions.pop("delete_selected", None)
+        return actions
+
+    @admin.action(description="Eliminar seleccionados (borrado lógico)")
+    def eliminar_logicamente(self, request, queryset):
+        pacientes_activos = queryset.filter(eliminado=False)
+        cantidad = pacientes_activos.count()
+        for paciente in pacientes_activos:
+            paciente.soft_delete()
+        self.message_user(
+            request,
+            f"Se marcaron {cantidad} paciente(s) como eliminados.",
+        )
