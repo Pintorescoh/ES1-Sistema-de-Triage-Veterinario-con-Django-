@@ -1,0 +1,217 @@
+Pruebas de la API ES3 con curl - 2026-10-04 21:54
+Servidor: http://127.0.0.1:8000
+Los tokens aparecen truncados (12 caracteres + ...) y la contraseña como ***.
+
+======================================================================
+1. AUTENTICACION JWT
+======================================================================
+
+[1] Token para usuario_admin
+$ curl -X POST -H "Content-Type: application/json" -d '{"password":"***","username":"usuario_admin"}' http://127.0.0.1:8000/api/token/
+-> HTTP 200 (esperado 200) OK
+{"refresh":"eyJhbGciOiJI...","access":"eyJhbGciOiJI..."}
+
+[2] Token para usuario_normal
+$ curl -X POST -H "Content-Type: application/json" -d '{"password":"***","username":"usuario_normal"}' http://127.0.0.1:8000/api/token/
+-> HTTP 200 (esperado 200) OK
+{"refresh":"eyJhbGciOiJI...","access":"eyJhbGciOiJI..."}
+
+[3] Token para usuario_viewer
+$ curl -X POST -H "Content-Type: application/json" -d '{"password":"***","username":"usuario_viewer"}' http://127.0.0.1:8000/api/token/
+-> HTTP 200 (esperado 200) OK
+{"refresh":"eyJhbGciOiJI...","access":"eyJhbGciOiJI..."}
+
+[4] GET lista SIN token
+$ curl -X GET http://127.0.0.1:8000/api/pacientes/
+-> HTTP 401 (esperado 401) OK
+{"detail":"Las credenciales de autenticación no se proveyeron."}
+
+[5] GET lista con prefijo 'Token' en vez de 'Bearer'
+$ curl -X GET -H "Authorization: Token eyJhbGciOiJI..." http://127.0.0.1:8000/api/pacientes/
+-> HTTP 401 (esperado 401) OK
+{"detail":"Las credenciales de autenticación no se proveyeron."}
+
+[6] GET lista con token falso
+$ curl -X GET -H "Authorization: Bearer abc.def.ghi" http://127.0.0.1:8000/api/pacientes/
+-> HTTP 401 (esperado 401) OK
+{"detail":"El token provisto no es válido para ningún tipo de token","code":"token_not_valid","messages":[{"token_class":"AccessToken","token_type":"access","message":"Token is invalid"}]}
+
+======================================================================
+2. CRUD CORRECTO (usuario normal)
+======================================================================
+
+[7] GET lista paginada
+$ curl -X GET -H "Authorization: Bearer eyJhbGciOiJI..." http://127.0.0.1:8000/api/pacientes/
+-> HTTP 200 (esperado 200) OK
+{"count":5,"next":null,"previous":null,"results":[{"id":6,"nombre":"Berto","dificultad_respiracion":"No","dolor":5,"gravedad":"Verde","fecha":"2026-09-20T19:26:53.423517-03:00"},{"id":5,"nombre":"Vaquita","dificultad_respiracion":"Sí","dolor":8,"gravedad":"Código Rojo","fecha":"2026-09-15T21:20:57-03:00"},{"id":2,"nombre":"Suzu","dificultad_respiracion":"No","dolor":8,"gravedad":"Código Amarillo","fecha":"2026-09-13T23:01:21.353528-03:00"},{"id":1,"nombre":"Mono","dificultad_respiracion":"Sí","dolor":4,"gravedad":"Código Rojo","fecha":"2026-09-13T23:01:21.335596-03:00"},{"id":3,"nombre":"Babi","dificultad_respiracion":"No","dolor":2,"gravedad":"Código Verde","fecha":"2026-09-13T23:01:21-03:00"}]}
+
+[8] POST crear (manda gravedad 'Verde': debe ignorarse)
+$ curl -X POST -H "Authorization: Bearer eyJhbGciOiJI..." -H "Content-Type: application/json" -d '{"nombre": "Paciente prueba API", "dificultad_respiracion": "No", "dolor": 7, "gravedad": "Verde"}' http://127.0.0.1:8000/api/pacientes/
+-> HTTP 201 (esperado 201) OK
+{"id":12,"nombre":"Paciente prueba API","dificultad_respiracion":"No","dolor":7,"gravedad":"Amarillo","fecha":"2026-10-04T21:54:16.743142-03:00"}
+
+[9] GET detalle del creado
+$ curl -X GET -H "Authorization: Bearer eyJhbGciOiJI..." http://127.0.0.1:8000/api/pacientes/12/
+-> HTTP 200 (esperado 200) OK
+{"id":12,"nombre":"Paciente prueba API","dificultad_respiracion":"No","dolor":7,"gravedad":"Amarillo","fecha":"2026-10-04T21:54:16.743142-03:00"}
+
+[10] PATCH dificultad_respiracion = Sí (gravedad pasa a Rojo)
+$ curl -X PATCH -H "Authorization: Bearer eyJhbGciOiJI..." -H "Content-Type: application/json" -d '{"dificultad_respiracion": "Sí"}' http://127.0.0.1:8000/api/pacientes/12/
+-> HTTP 200 (esperado 200) OK
+{"id":12,"nombre":"Paciente prueba API","dificultad_respiracion":"Sí","dolor":7,"gravedad":"Rojo","fecha":"2026-10-04T21:54:16.743142-03:00"}
+
+[11] PUT reemplazo completo
+$ curl -X PUT -H "Authorization: Bearer eyJhbGciOiJI..." -H "Content-Type: application/json" -d '{"nombre": "Paciente prueba API", "dificultad_respiracion": "No", "dolor": 2}' http://127.0.0.1:8000/api/pacientes/12/
+-> HTTP 200 (esperado 200) OK
+{"id":12,"nombre":"Paciente prueba API","dificultad_respiracion":"No","dolor":2,"gravedad":"Verde","fecha":"2026-10-04T21:54:16.743142-03:00"}
+
+[12] GET filtro ?gravedad=verde
+$ curl -X GET -H "Authorization: Bearer eyJhbGciOiJI..." http://127.0.0.1:8000/api/pacientes/?gravedad=verde
+-> HTTP 200 (esperado 200) OK
+{"count":2,"next":null,"previous":null,"results":[{"id":12,"nombre":"Paciente prueba API","dificultad_respiracion":"No","dolor":2,"gravedad":"Verde","fecha":"2026-10-04T21:54:16.743142-03:00"},{"id":6,"nombre":"Berto","dificultad_respiracion":"No","dolor":5,"gravedad":"Verde","fecha":"2026-09-20T19:26:53.423517-03:00"}]}
+
+======================================================================
+3. ERRORES Y VALIDACIONES
+======================================================================
+
+[13] POST dolor negativo
+$ curl -X POST -H "Authorization: Bearer eyJhbGciOiJI..." -H "Content-Type: application/json" -d '{"nombre": "Ana", "dificultad_respiracion": "No", "dolor": -1}' http://127.0.0.1:8000/api/pacientes/
+-> HTTP 400 (esperado 400) OK
+{"dolor":["El nivel de dolor debe estar entre 0 y 10."]}
+
+[14] POST varios campos malos a la vez
+$ curl -X POST -H "Authorization: Bearer eyJhbGciOiJI..." -H "Content-Type: application/json" -d '{"nombre": "", "dificultad_respiracion": "Talvez", "dolor": "mucho"}' http://127.0.0.1:8000/api/pacientes/
+-> HTTP 400 (esperado 400) OK
+{"nombre":["Este campo no puede estar en blanco."],"dificultad_respiracion":["La dificultad respiratoria debe ser \"Sí\" o \"No\"."],"dolor":["El dolor debe ser un número entero."]}
+
+[15] POST JSON mal formado
+$ curl -X POST -H "Authorization: Bearer eyJhbGciOiJI..." -H "Content-Type: application/json" -d '{nombre: Ana' http://127.0.0.1:8000/api/pacientes/
+-> HTTP 400 (esperado 400) OK
+{"detail":"JSON parse error - Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"}
+
+[16] PUT incompleto
+$ curl -X PUT -H "Authorization: Bearer eyJhbGciOiJI..." -H "Content-Type: application/json" -d '{"nombre": "Ana"}' http://127.0.0.1:8000/api/pacientes/12/
+-> HTTP 400 (esperado 400) OK
+{"dificultad_respiracion":["Este campo es requerido."],"dolor":["Este campo es requerido."]}
+
+[17] GET filtro con gravedad inexistente
+$ curl -X GET -H "Authorization: Bearer eyJhbGciOiJI..." http://127.0.0.1:8000/api/pacientes/?gravedad=Azul
+-> HTTP 400 (esperado 400) OK
+{"gravedad":["Valor no válido. Usa uno de: Rojo, Amarillo, Verde."]}
+
+[18] GET id que no existe
+$ curl -X GET -H "Authorization: Bearer eyJhbGciOiJI..." http://127.0.0.1:8000/api/pacientes/99999/
+-> HTTP 404 (esperado 404) OK
+{"detail":"No existe un paciente activo con ese id."}
+
+[19] GET página que no existe
+$ curl -X GET -H "Authorization: Bearer eyJhbGciOiJI..." http://127.0.0.1:8000/api/pacientes/?page=999
+-> HTTP 404 (esperado 404) OK
+{"detail":"Página inválida."}
+
+[20] POST sobre un detalle (verbo no permitido)
+$ curl -X POST -H "Authorization: Bearer eyJhbGciOiJI..." -H "Content-Type: application/json" -d '{}' http://127.0.0.1:8000/api/pacientes/12/
+-> HTTP 405 (esperado 405) OK
+{"detail":"Método \"POST\" no permitido."}
+
+======================================================================
+4. PERMISOS POR ROL
+======================================================================
+
+[21] viewer GET lista
+$ curl -X GET -H "Authorization: Bearer eyJhbGciOiJI..." http://127.0.0.1:8000/api/pacientes/
+-> HTTP 200 (esperado 200) OK
+{"count":6,"next":null,"previous":null,"results":[{"id":12,"nombre":"Paciente prueba API","dificultad_respiracion":"No","dolor":2,"gravedad":"Verde","fecha":"2026-10-04T21:54:16.743142-03:00"},{"id":6,"nombre":"Berto","dificultad_respiracion":"No","dolor":5,"gravedad":"Verde","fecha":"2026-09-20T19:26:53.423517-03:00"},{"id":5,"nombre":"Vaquita","dificultad_respiracion":"Sí","dolor":8,"gravedad":"Código Rojo","fecha":"2026-09-15T21:20:57-03:00"},{"id":2,"nombre":"Suzu","dificultad_respiracion":"No","dolor":8,"gravedad":"Código Amarillo","fecha":"2026-09-13T23:01:21.353528-03:00"},{"id":1,"nombre":"Mono","dificultad_respiracion":"Sí","dolor":4,"gravedad":"Código Rojo","fecha":"2026-09-13T23:01:21.335596-03:00"},{"id":3,"nombre":"Babi","dificultad_respiracion":"No","dolor":2,"gravedad":"Código Verde","fecha":"2026-09-13T23:01:21-03:00"}]}
+
+[22] viewer POST
+$ curl -X POST -H "Authorization: Bearer eyJhbGciOiJI..." -H "Content-Type: application/json" -d '{"nombre": "Intruso", "dificultad_respiracion": "No", "dolor": 1}' http://127.0.0.1:8000/api/pacientes/
+-> HTTP 403 (esperado 403) OK
+{"detail":"Tu rol no tiene permiso para realizar esta acción."}
+
+[23] viewer PATCH
+$ curl -X PATCH -H "Authorization: Bearer eyJhbGciOiJI..." -H "Content-Type: application/json" -d '{"dolor": 9}' http://127.0.0.1:8000/api/pacientes/12/
+-> HTTP 403 (esperado 403) OK
+{"detail":"Tu rol no tiene permiso para realizar esta acción."}
+
+[24] normal DELETE
+$ curl -X DELETE -H "Authorization: Bearer eyJhbGciOiJI..." http://127.0.0.1:8000/api/pacientes/12/
+-> HTTP 403 (esperado 403) OK
+{"detail":"Tu rol no tiene permiso para realizar esta acción."}
+
+[25] admin DELETE (borrado lógico)
+$ curl -X DELETE -H "Authorization: Bearer eyJhbGciOiJI..." http://127.0.0.1:8000/api/pacientes/12/
+-> HTTP 204 (esperado 204) OK
+(sin cuerpo)
+
+[26] GET del paciente borrado
+$ curl -X GET -H "Authorization: Bearer eyJhbGciOiJI..." http://127.0.0.1:8000/api/pacientes/12/
+-> HTTP 404 (esperado 404) OK
+{"detail":"No existe un paciente activo con ese id."}
+
+======================================================================
+5. REFRESCO DEL TOKEN
+======================================================================
+
+[27] Refresh válido entrega un access nuevo
+$ curl -X POST -H "Content-Type: application/json" -d '{"refresh":"eyJhbGciOiJI..."}' http://127.0.0.1:8000/api/token/refresh/
+-> HTTP 200 (esperado 200) OK
+{"access":"eyJhbGciOiJI..."}
+
+[28] Refresh inválido
+$ curl -X POST -H "Content-Type: application/json" -d '{"refresh": "basura"}' http://127.0.0.1:8000/api/token/refresh/
+-> HTTP 401 (esperado 401) OK
+{"detail":"Token is invalid","code":"token_not_valid"}
+
+======================================================================
+6. LIMITE DE INTENTOS EN /api/token/ (5 por minuto; ya se usaron 3)
+======================================================================
+
+[29] Clave incorrecta (intento 4)
+$ curl -X POST -H "Content-Type: application/json" -d '{"password":"clave-incorrecta","username":"usuario_admin"}' http://127.0.0.1:8000/api/token/
+-> HTTP 401 (esperado 401) OK
+{"detail":"No se encontró una cuenta de usuario activa para las credenciales provistas"}
+
+[30] Clave incorrecta (intento 5)
+$ curl -X POST -H "Content-Type: application/json" -d '{"password":"clave-incorrecta","username":"usuario_admin"}' http://127.0.0.1:8000/api/token/
+-> HTTP 401 (esperado 401) OK
+{"detail":"No se encontró una cuenta de usuario activa para las credenciales provistas"}
+
+[31] Clave incorrecta (intento 6: bloqueado)
+$ curl -X POST -H "Content-Type: application/json" -d '{"password":"clave-incorrecta","username":"usuario_admin"}' http://127.0.0.1:8000/api/token/
+-> HTTP 429 (esperado 429) OK
+{"detail":"Solicitud fue regulada (throttled). Se espera que esté disponible en 58 segundos."}
+
+======================================================================
+RESUMEN: 31 de 31 pruebas con el código esperado
+======================================================================
+[1]  OK     200  Token para usuario_admin
+[2]  OK     200  Token para usuario_normal
+[3]  OK     200  Token para usuario_viewer
+[4]  OK     401  GET lista SIN token
+[5]  OK     401  GET lista con prefijo 'Token' en vez de 'Bearer'
+[6]  OK     401  GET lista con token falso
+[7]  OK     200  GET lista paginada
+[8]  OK     201  POST crear (manda gravedad 'Verde': debe ignorarse)
+[9]  OK     200  GET detalle del creado
+[10] OK     200  PATCH dificultad_respiracion = Sí (gravedad pasa a Rojo)
+[11] OK     200  PUT reemplazo completo
+[12] OK     200  GET filtro ?gravedad=verde
+[13] OK     400  POST dolor negativo
+[14] OK     400  POST varios campos malos a la vez
+[15] OK     400  POST JSON mal formado
+[16] OK     400  PUT incompleto
+[17] OK     400  GET filtro con gravedad inexistente
+[18] OK     404  GET id que no existe
+[19] OK     404  GET página que no existe
+[20] OK     405  POST sobre un detalle (verbo no permitido)
+[21] OK     200  viewer GET lista
+[22] OK     403  viewer POST
+[23] OK     403  viewer PATCH
+[24] OK     403  normal DELETE
+[25] OK     204  admin DELETE (borrado lógico)
+[26] OK     404  GET del paciente borrado
+[27] OK     200  Refresh válido entrega un access nuevo
+[28] OK     401  Refresh inválido
+[29] OK     401  Clave incorrecta (intento 4)
+[30] OK     401  Clave incorrecta (intento 5)
+[31] OK     429  Clave incorrecta (intento 6: bloqueado)
