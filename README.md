@@ -158,7 +158,7 @@ La configuración está en el bloque `REST_FRAMEWORK` de `clinica/settings.py`:
 
 ## 🧪 Pruebas con cliente HTTP
 
-El script `pruebas/probar_api.ps1` ejecuta 31 peticiones con `curl.exe` y compara cada código de estado con el esperado. Cubre autenticación, CRUD, errores 400/404/405, permisos de cada rol (403), refresco de token y el bloqueo por intentos (429).
+El script `pruebas/probar_api.ps1` ejecuta 32 peticiones con `curl.exe` y compara cada código de estado con el esperado. Cubre autenticación, CRUD, errores 400/404/405, la raíz `/api/`, permisos de cada rol (403), refresco de token y el bloqueo por intentos (429).
 
 Con el servidor corriendo en otra terminal:
 
@@ -166,7 +166,7 @@ Con el servidor corriendo en otra terminal:
 powershell -ExecutionPolicy Bypass -File pruebas\probar_api.ps1
 ```
 
-El script pide la contraseña de los `usuario_*` de forma oculta y guarda la salida en `pruebas/resultados_curl.txt`, con los tokens truncados y la contraseña como `***`. La evidencia entregada registra **31 de 31 pruebas con el código esperado**. Si se ejecuta dos veces en menos de un minuto, la segunda vez `/api/token/` responde 429 por el límite de intentos.
+El script pide la contraseña de los `usuario_*` de forma oculta y guarda la salida en `pruebas/resultados_curl.txt`, con los tokens truncados y la contraseña como `***`. La evidencia entregada registra **32 de 32 pruebas con el código esperado**. Si se ejecuta dos veces en menos de un minuto, la segunda vez `/api/token/` responde 429 por el límite de intentos.
 
 ## 📁 Archivos de la API
 
@@ -178,5 +178,6 @@ El script pide la contraseña de los `usuario_*` de forma oculta y guarda la sal
 | `clinica/settings.py` | `INSTALLED_APPS`, `REST_FRAMEWORK`, `SIMPLE_JWT` y `SPECTACULAR_SETTINGS` |
 | `clinica/urls.py` | Router, endpoints de token y documentación |
 | `pruebas/probar_api.ps1` | Script de pruebas con `curl.exe` |
-| `pruebas/resultados_curl.txt` | Evidencia: salida de las 31 pruebas |
+| `pruebas/resultados_curl.txt` | Evidencia: salida de las 32 pruebas |
+| `pruebas/README.md` | Índice: qué prueba cubre cada endpoint |
 | `ia.md` | Uso crítico de IA: qué se adoptó, qué se descartó y por qué |

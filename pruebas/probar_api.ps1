@@ -148,6 +148,10 @@ Probar "Clave incorrecta (intento 4)" 401 POST "/api/token/" -Cuerpo $malo | Out
 Probar "Clave incorrecta (intento 5)" 401 POST "/api/token/" -Cuerpo $malo | Out-Null
 Probar "Clave incorrecta (intento 6: bloqueado)" 429 POST "/api/token/" -Cuerpo $malo | Out-Null
 
+# ---------------------------------------------------------------- raíz
+Seccion "7. RAIZ DE LA API (generada por el router)"
+Probar "GET /api/ lista los recursos disponibles" 200 GET "/api/" -Auth $viewer | Out-Null
+
 Remove-Item $tmp -ErrorAction SilentlyContinue
 
 $fallas = @($resumen | Where-Object { $_ -match 'FALLA' }).Count
